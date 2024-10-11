@@ -1,0 +1,54 @@
+name: Update Version File in Release Tag and Main
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  update-version:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0  # Fetch all history for all tags and branches
+
+    - name: Update version.json
+      run: |
+        echo "{\"version\": \"${{ github.event.release.tag_name }}\"}" > version.json
+
+    - name: Commit changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add version.json
+        git commit -m "Update version to ${{ github.event.release.tag_name }}"
+
+    - name: Push changes to new branch
+      run: |
+        git checkout -b update-version-${{ github.event.release.tag_name }}
+        git push origin update-version-${{ github.event.release.tag_name }}
+
+    - name: Update tag
+      run: |
+        git push origin :refs/tags/${{ github.event.release.tag_name }}
+        git tag -fa ${{ github.event.release.tag_name }} -m "Update version file"
+        git push origin --tags --force
+
+    - name: Update main branch
+      run: |
+        git checkout main
+        git checkout update-version-${{ github.event.release.tag_name }} -- version.json
+        git add version.json
+        git commit -m "Update version to ${{ github.event.release.tag_name }} in main"
+        git push origin main
+
+    - name: Clean up branch
+      run: |
+        git push origin --delete update-version-${{ github.event.release.tag_name }}
+      continue-on-error: true
+
+    - name: Update release assets
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh release upload ${{ github.event.release.tag_name }} version.json --clobber
