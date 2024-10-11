@@ -19,31 +19,10 @@ class ExamplePlugin extends Plugin
 
     public function boot()
     {
-        $this->loadViewsFrom(__DIR__ . '/resources/views', 'discussions');
-        $this->loadTranslationsFrom(__DIR__ . '/src/Lang', 'discussions');
-        $this->loadMigrationsFrom(__DIR__ . '/database/migrations');
-      
-        $this->publishes([
-            __DIR__ . '/config/discussions.php' => config_path('discussions.php'),
-        ], 'discussions_config');
-
-        $this->publishes([
-            __DIR__ . '/database/migrations/' => database_path('migrations'),
-        ], 'discussions_migrations');
-
-        $this->publishes([
-            __DIR__ . '/database/seeders/' => database_path('seeders'),
-        ], 'discussions_seeders');
-
-        $this->publishes([
-            __DIR__ . '/src/Lang' => resource_path('lang/discussions'),
-        ], 'discussions_lang');
-
+        $this->loadViewsFrom(__DIR__ . '/resources/views', 'example');
         $this->loadRoutesFrom(__DIR__ . '/routes/web.php');
 
-        Livewire::component('discussion', \Wave\Plugins\Discussions\Components\Discussion::class);
-        Livewire::component('discussions', \Wave\Plugins\Discussions\Components\Discussions::class);
-        Livewire::component('posts', \Wave\Plugins\Discussions\Components\Posts::class);
+        Livewire::component('discussion', \Wave\Plugins\Example\Components\Example::class);
     }
 
     public function getPluginInfo(): array
